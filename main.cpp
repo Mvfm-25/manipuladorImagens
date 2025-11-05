@@ -1,4 +1,4 @@
-// Estado inicial do projeto, estou lendo apenas lendo um arquivo.txt e imprimindo seu conteúdo na tela.
+// Estado inicial do projeto. Aprendendo a como incorporar arquivos da biblioteca stb_image para minha conveniência.
 // [mvfm]
 
 // Criado : 05/11/2025  ||  Última modificação: 05/11/2025
@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 // Trazendo da biblioteca stb_image por conveniência do programador.
 #define STB_IMAGE_IMPLEMENTATION
@@ -15,6 +16,7 @@
 
 // Protótipos
 int lerArquivo(std::string caminhoArquivo);
+int bwImagem(std::string caminhoArquivo);
 
 int main(){
     std::string caminhoArquivo = "img/texto.txt";
@@ -47,7 +49,7 @@ int lerArquivo(std::string caminhoArquivo){
 
 }
 
-int carregaImagem(std::string caminhoArquivo){
+int bwImagem(std::string caminhoArquivo){
     int largura, altura, canais;
     // Fazendo a conversão de String para uma 'C-Style' string.
     unsigned char* img = stbi_load(caminhoArquivo.c_str(), &largura, &altura, &canais, 0);
@@ -55,8 +57,14 @@ int carregaImagem(std::string caminhoArquivo){
     // Caso null, basicamente.
     if(!img){
         std::cout << "Falha ao carregar imagem!";
-        return 0;
+        return 1;
     }
 
+    typedef unsigned char uchar;
+    std::vector<uchar> dadosPixel(altura * largura);
+    char saida[] = "saida.png";
+    
+    for(int i = 0; i < altura * largura; i++){
 
+    }
 }
