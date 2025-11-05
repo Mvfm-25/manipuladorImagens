@@ -7,8 +7,17 @@
 #include <fstream>
 #include <string>
 
+// Protótipos
+int lerArquivo(std::string caminhoArquivo);
+
 int main(){
-    std::ifstream arquivo("img/texto.txt");
+    std::string caminhoArquivo = "img/texto.txt";
+    lerArquivo(caminhoArquivo);
+    return 0;
+}
+
+int lerArquivo(std::string caminhoArquivo){
+    std::ifstream arquivo(caminhoArquivo);
     std::string linha;
     std::string conteudo;
 
@@ -29,4 +38,5 @@ int main(){
     // Finalmente imprimindo o conteúdo
     std::cout << conteudo;
     return 0;
+
 }
