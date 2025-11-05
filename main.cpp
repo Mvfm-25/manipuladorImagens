@@ -7,6 +7,12 @@
 #include <fstream>
 #include <string>
 
+// Trazendo da biblioteca stb_image por conveniência do programador.
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image/stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image/stb_image_write.h"
+
 // Protótipos
 int lerArquivo(std::string caminhoArquivo);
 
@@ -38,5 +44,19 @@ int lerArquivo(std::string caminhoArquivo){
     // Finalmente imprimindo o conteúdo
     std::cout << conteudo;
     return 0;
+
+}
+
+int carregaImagem(std::string caminhoArquivo){
+    int largura, altura, canais;
+    // Fazendo a conversão de String para uma 'C-Style' string.
+    unsigned char* img = stbi_load(caminhoArquivo.c_str(), &largura, &altura, &canais, 0);
+
+    // Caso null, basicamente.
+    if(!img){
+        std::cout << "Falha ao carregar imagem!";
+        return 0;
+    }
+
 
 }
