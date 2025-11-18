@@ -26,15 +26,24 @@ int salvaImg(std::string caminhoArquivo, int largura, int altura, int canais, co
 
 int main(){
     std::string arquivoEntrada, arquivoSaida;
+
+    int escolha = 0;
     
     std::cout << "Digite o caminho da imagem: " << std::endl;
     std::getline(std::cin, arquivoEntrada);
+
     std::cout << "Digite o nome do arquivo de saída: " << std::endl;
     std::getline(std::cin, arquivoSaida);
+
+    std::cout << "Digite como queiras editar a imagem selecionada: " << std::endl;
+    std::cout << "1 - Tons de Cinza || 2 - Cores invertidas " << std::endl;
+    std::cin >> escolha;
     
-    bwImagem(arquivoEntrada, arquivoSaida);
-    revImagem(arquivoEntrada, arquivoSaida);
-    
+    switch (escolha)
+    {
+        case 1 : bwImagem(arquivoEntrada, arquivoSaida); break;
+        case 2 :revImagem(arquivoEntrada, arquivoSaida); break;
+    }
     return 0;
 }
 
