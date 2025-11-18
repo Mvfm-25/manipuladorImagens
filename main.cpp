@@ -17,21 +17,23 @@
 
 // Protótipos
 int lerArquivoTexto(std::string caminhoArquivo);
-int bwImagem(std::string caminhoArquivo);
-int revImagem(std::string caminhoArquivo);
+int bwImagem(std::string caminhoArquivo, std::string caminhoSaida);
+int revImagem(std::string caminhoArquivo, std::string caminhoSaida);
 
 // Protótipos de Complementares.
 unsigned char* carregaImg(std::string caminhoArquivo, int* largura, int* altura, int* canais);
 int salvaImg(std::string caminhoArquivo, int largura, int altura, int canais, const unsigned char* dados);
 
 int main(){
-    std::string arquivo;
+    std::string arquivoEntrada, arquivoSaida;
     
-    std::cout << "Digite o caminho da imagem: ";
-    std::getline(std::cin, arquivo);
+    std::cout << "Digite o caminho da imagem: " << std::endl;
+    std::getline(std::cin, arquivoEntrada);
+    std::cout << "Digite o nome do arquivo de saída: " << std::endl;
+    std::getline(std::cin, arquivoSaida);
     
-    bwImagem(arquivo);
-    revImagem(arquivo);
+    bwImagem(arquivoEntrada, arquivoSaida);
+    revImagem(arquivoEntrada, arquivoSaida);
     
     return 0;
 }
@@ -96,7 +98,7 @@ int salvaImg(std::string caminhoArquivo, int largura, int altura, int canais, co
 
 }
 
-int bwImagem(std::string caminhoArquivo){
+int bwImagem(std::string caminhoArquivo, std::string caminhoSaida){
     int largura, altura, canais;
 
     // Do jeito que estou lendo, utilizando o stbi, consigo carregar qualquer formato comum.
@@ -136,13 +138,13 @@ int bwImagem(std::string caminhoArquivo){
 
     // Fazendo parte de saída
     // Sempre salvando como png por enquanto.
-    int resultado = salvaImg("img/saida_bw.png", largura, altura, 1, imgBW.data());
+    int resultado = salvaImg(caminhoSaida.c_str(), largura, altura, 1, imgBW.data());
     stbi_image_free(img);
     return resultado;
 }
 
 // Método para inverter as cores de uma imagem.
-int revImagem(std::string caminhoArquivo){
+int revImagem(std::string caminhoArquivo, std::string caminhoSaida){
 
     std::cout << "Iniciando método para inverter as cores da imagem..." << std::endl;;
 
@@ -185,7 +187,7 @@ int revImagem(std::string caminhoArquivo){
 
     // Fazendo parte de saída
     // Sempre salvando como png por enquanto.
-    int resultado = salvaImg("img/saida_ing.png", largura, altura, canais, revImagem.data());
+    int resultado = salvaImg(caminhoSaida.c_str(), largura, altura, canais, revImagem.data());
     stbi_image_free(img);
     return resultado;
 }
