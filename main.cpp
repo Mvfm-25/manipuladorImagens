@@ -1,5 +1,5 @@
-// Estado inicial do projeto. Aprendendo a como incorporar arquivos da biblioteca stb_image para minha conveniência.
-// Por agora, estou testando apenas o método de imagens grayscale.
+// Métodos de edição continuam bem simples por enquanto, futuras implementações são :
+// Tons de sépia, rotação da imagem, aumentar nitidez, gaussian blur.
 // [mvfm]
 
 // Criado : 05/11/2025  ||  Última modificação: 18/11/2025
