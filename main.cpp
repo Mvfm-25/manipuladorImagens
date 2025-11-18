@@ -21,12 +21,18 @@ int bwImagem(std::string caminhoArquivo);
 int revImagem(std::string caminhoArquivo);
 
 // Protótipos de Complementares.
-unsigned char* carregaImg(std::string caminhoArquivo, int* altura, int* largura, int* canais);
+unsigned char* carregaImg(std::string caminhoArquivo, int* largura, int* altura, int* canais);
 int salvaImg(std::string caminhoArquivo, int largura, int altura, int canais, const unsigned char* dados);
 
 int main(){
-    bwImagem("img/Puppet_Tails_Is_Shocked.png");
-    revImagem("img/Puppet_Tails_Is_Shocked.png");
+    std::string arquivo;
+    
+    std::cout << "Digite o caminho da imagem: ";
+    std::getline(std::cin, arquivo);
+    
+    bwImagem(arquivo);
+    revImagem(arquivo);
+    
     return 0;
 }
 
@@ -56,7 +62,7 @@ int lerArquivoTexto(std::string caminhoArquivo){
 }
 
 // Novo método para lidar com o carregar de imagens, pra não repetir tantas linhas de código em novos métodos de manipulação.
-unsigned char* carregaImg(std::string caminhoArquivo, int* altura, int* largura, int* canais){
+unsigned char* carregaImg(std::string caminhoArquivo, int* largura, int* altura, int* canais){
 
     unsigned char* img = stbi_load(caminhoArquivo.c_str(), largura, altura, canais, 0);
     if(!img){
@@ -95,7 +101,10 @@ int bwImagem(std::string caminhoArquivo){
 
     // Do jeito que estou lendo, utilizando o stbi, consigo carregar qualquer formato comum.
     // Adendo : Testando ontem, carregando uma imagem .webp parece estar dando erro, mas não tenho certeza o pq.
-    unsigned char* img = carregaImg(caminhoArquivo.c_str(), &largura, &altura, &canais);
+    unsigned char* img = carregaImg(caminhoArquivo, &largura, &altura, &canais);
+
+    // Só pra ter certeza 
+    if(!img){return 1;}
 
     // Pra ter certeza que só retorna 1 canal, Grayscale
     std::vector<unsigned char> imgBW(largura * altura);
@@ -138,7 +147,10 @@ int revImagem(std::string caminhoArquivo){
     std::cout << "Iniciando método para inverter as cores da imagem..." << std::endl;;
 
     int largura, altura, canais;
-    unsigned char* img = carregaImg(caminhoArquivo.c_str(), &largura, &altura, &canais);
+    unsigned char* img = carregaImg(caminhoArquivo, &largura, &altura, &canais);
+
+    // Só pra ter certeza 
+    if(!img){return 1;}
 
     // Levando em consideração os canais para o tamanho do novo arquivo.
     // Só leva em consideração os canais só no caso do bw.
@@ -173,7 +185,7 @@ int revImagem(std::string caminhoArquivo){
 
     // Fazendo parte de saída
     // Sempre salvando como png por enquanto.
-    int resultado = salvaImg("img/saida_ing.png", largura, altura, 1, revImagem.data());
+    int resultado = salvaImg("img/saida_ing.png", largura, altura, canais, revImagem.data());
     stbi_image_free(img);
     return resultado;
 }
