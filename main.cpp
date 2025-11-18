@@ -16,9 +16,13 @@
 #include "stb_image/stb_image_write.h"
 
 // Protótipos
-int lerArquivo(std::string caminhoArquivo);
+int lerArquivoTexto(std::string caminhoArquivo);
 int bwImagem(std::string caminhoArquivo);
 int revImagem(std::string caminhoArquivo);
+
+// Protótipos de Complementares.
+unsigned char* carregaImg(std::string caminhoArquivo, int* altura, int* largura, int* canais);
+int salvaImg(std::string caminhoArquivo, int largura, int altura, int canais, const unsigned char* dados);
 
 int main(){
     bwImagem("img/Puppet_Tails_Is_Shocked.png");
@@ -26,7 +30,7 @@ int main(){
     return 0;
 }
 
-int lerArquivo(std::string caminhoArquivo){
+int lerArquivoTexto(std::string caminhoArquivo){
     std::ifstream arquivo(caminhoArquivo);
     std::string linha;
     std::string conteudo;
@@ -51,18 +55,47 @@ int lerArquivo(std::string caminhoArquivo){
 
 }
 
+// Novo método para lidar com o carregar de imagens, pra não repetir tantas linhas de código em novos métodos de manipulação.
+unsigned char* carregaImg(std::string caminhoArquivo, int* altura, int* largura, int* canais){
+
+    unsigned char* img = stbi_load(caminhoArquivo.c_str(), largura, altura, canais, 0);
+    if(!img){
+        std::cerr << "Erro ao carregar a imagem!" << caminhoArquivo << std::endl; 
+        return nullptr;
+    }
+
+    std::cout << "Imagem carregada: " << *largura << "x" << *altura << " com " << *canais << " canais" << std::endl;
+    return img;
+}
+
+// Novo método complementar, agora para salvar imagens.
+int salvaImg(std::string caminhoArquivo, int largura, int altura, int canais, const unsigned char* dados){
+
+    int sucesso = stbi_write_png(
+        caminhoArquivo.c_str(),
+        largura,
+        altura,
+        canais,
+        dados,
+        largura * canais
+    );
+    
+    if(!sucesso){
+        std::cerr << "Falha ao salvar imagem: " << caminhoArquivo << std::endl;
+        return 1;
+    }
+    
+    std::cout << "Imagem salva com sucesso: " << caminhoArquivo << std::endl;
+    return 0;
+
+}
+
 int bwImagem(std::string caminhoArquivo){
     int largura, altura, canais;
 
     // Do jeito que estou lendo, utilizando o stbi, consigo carregar qualquer formato comum.
     // Adendo : Testando ontem, carregando uma imagem .webp parece estar dando erro, mas não tenho certeza o pq.
-    unsigned char* img = stbi_load(caminhoArquivo.c_str(), &largura, &altura, &canais, 0);
-
-    // Caso null, basicamente.
-    if(!img){
-        std::cout << "Falha ao carregar imagem!";
-        return 1;
-    }
+    unsigned char* img = carregaImg(caminhoArquivo.c_str(), &largura, &altura, &canais);
 
     // Pra ter certeza que só retorna 1 canal, Grayscale
     std::vector<unsigned char> imgBW(largura * altura);
@@ -94,37 +127,18 @@ int bwImagem(std::string caminhoArquivo){
 
     // Fazendo parte de saída
     // Sempre salvando como png por enquanto.
-    const char* saida = "img/saida_bw.png";
-
-    int sucesso = stbi_write_png(
-        saida,
-        largura,
-        altura,
-        1, // 1 canal.
-        imgBW.data(),
-        largura
-    );
-
-    if(!sucesso){
-        std::cerr << "Falha ao salvar a imagem resultante!" << std::endl;
-        stbi_image_free(img);
-        return 1;
-    }
-
-    std::cout << "Imagem resultante salva como : "  << saida << std::endl;
+    int resultado = salvaImg("img/saida_bw.png", largura, altura, 1, imgBW.data());
     stbi_image_free(img);
-    return 0;
+    return resultado;
 }
 
 // Método para inverter as cores de uma imagem.
 int revImagem(std::string caminhoArquivo){
 
-    std::cout << "Iniciando método para inverter as cores da imagem...";
+    std::cout << "Iniciando método para inverter as cores da imagem..." << std::endl;;
 
-    // Por enquanto, mesma 'filosofia' que o bwImagem.
-    // Talvez seja legal separar todo esse caminho repetido em seu próprio método.
     int largura, altura, canais;
-    unsigned char* img = stbi_load(caminhoArquivo.c_str(), &largura, &altura, &canais, 0);
+    unsigned char* img = carregaImg(caminhoArquivo.c_str(), &largura, &altura, &canais);
 
     // Levando em consideração os canais para o tamanho do novo arquivo.
     // Só leva em consideração os canais só no caso do bw.
@@ -159,25 +173,7 @@ int revImagem(std::string caminhoArquivo){
 
     // Fazendo parte de saída
     // Sempre salvando como png por enquanto.
-    const char* saida = "img/saida_inv.png";
-
-    int sucesso = stbi_write_png(
-        saida,
-        largura,
-        altura,
-        4, // 4 canais, assumindo alpha.
-        revImagem.data(),
-        largura * canais // De novo, considerando os canais.
-    );
-
-    if(!sucesso){
-        std::cerr << "Falha ao salvar a imagem resultante!" << std::endl;
-        stbi_image_free(img);
-        return 1;
-    }
-
-    std::cout << "Imagem resultante salva como : "  << saida << std::endl;
+    int resultado = salvaImg("img/saida_ing.png", largura, altura, 1, revImagem.data());
     stbi_image_free(img);
-    return 0;
-
+    return resultado;
 }
