@@ -2,7 +2,7 @@
 // Tons de sépia, rotação da imagem, aumentar nitidez, gaussian blur.
 // [mvfm]
 
-// Criado : 05/11/2025  ||  Última modificação: 18/11/2025
+// Criado : 05/11/2025  ||  Última modificação: 19/11/2025
 
 #include <iostream>
 #include <fstream>
@@ -19,6 +19,7 @@
 int lerArquivoTexto(std::string caminhoArquivo);
 int bwImagem(std::string caminhoArquivo, std::string caminhoSaida);
 int revImagem(std::string caminhoArquivo, std::string caminhoSaida);
+int sepImagem(std::string caminhoArquivo, std::string caminhoSaida);
 
 // Protótipos de Complementares.
 unsigned char* carregaImg(std::string caminhoArquivo, int* largura, int* altura, int* canais);
@@ -42,7 +43,8 @@ int main(){
     switch (escolha)
     {
         case 1 : bwImagem(arquivoEntrada, arquivoSaida); break;
-        case 2 :revImagem(arquivoEntrada, arquivoSaida); break;
+        case 2 : revImagem(arquivoEntrada, arquivoSaida); break;
+        case 3 : sepImagem(arquivoEntrada, arquivoSaida); break;
     }
     return 0;
 }
@@ -155,8 +157,6 @@ int bwImagem(std::string caminhoArquivo, std::string caminhoSaida){
 // Método para inverter as cores de uma imagem.
 int revImagem(std::string caminhoArquivo, std::string caminhoSaida){
 
-    std::cout << "Iniciando método para inverter as cores da imagem..." << std::endl;;
-
     int largura, altura, canais;
     unsigned char* img = carregaImg(caminhoArquivo, &largura, &altura, &canais);
 
@@ -197,6 +197,48 @@ int revImagem(std::string caminhoArquivo, std::string caminhoSaida){
     // Fazendo parte de saída
     // Sempre salvando como png por enquanto.
     int resultado = salvaImg(caminhoSaida.c_str(), largura, altura, canais, revImagem.data());
+    stbi_image_free(img);
+    return resultado;
+}
+
+// Método para tons de sépia, queremos uma imagem mais amarelada - envelhecida.
+// Os cálculo são mais heurística este momento, baseando-me no meu T1 de PBN.
+int sepImagem(std::string caminhoArquivo, std::string caminhoSaida){
+
+    int largura, altura, canais;
+    unsigned char* img = carregaImg(caminhoArquivo, &largura, &altura, &canais);
+
+    std::vector<unsigned char> sepImagem(largura * altura * canais);
+
+    if(!img){
+        std::cout << "Falha ao carregar imagem!";
+        return 1;
+    }
+
+    for(int y = 0; y < altura; y++){
+        for(int x = 0; x < largura; x++){
+
+            int idxOrigem = (y * largura + x) * canais;
+            unsigned char r, g, b;
+
+            // Apenas lembrando : idxOrigem segue a ordem R, G & B.
+            // Portanto : idxOrigem + 0 = R, idxOrigem + 1 = G, idxOrigem + 2 = B.
+            r = (img[idxOrigem + 0] * 0.393) + (img[idxOrigem + 1] * 0.769) + (img[idxOrigem + 2] * 0.189);
+            g = (img[idxOrigem + 0] * 0.349) + (img[idxOrigem + 1] * 0.686) + (img[idxOrigem + 2] * 0.168);
+            b = (img[idxOrigem + 0] * 0.272) + (img[idxOrigem + 1] * 0.534) + (img[idxOrigem + 2] * 0.131);
+
+            sepImagem[idxOrigem + 0] = r;
+            sepImagem[idxOrigem + 1] = g;
+            sepImagem[idxOrigem + 2] = b;
+
+            // Se tiver canal alpha, copie sem modificar
+            if(canais == 4){
+                sepImagem[idxOrigem + 3] = img[idxOrigem + 3];
+            }
+        }
+    }
+
+    int resultado = salvaImg(caminhoSaida.c_str(), largura, altura, canais, sepImagem.data());
     stbi_image_free(img);
     return resultado;
 }
