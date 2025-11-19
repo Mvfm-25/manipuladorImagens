@@ -37,7 +37,7 @@ int main(){
     std::getline(std::cin, arquivoSaida);
 
     std::cout << "Digite como queiras editar a imagem selecionada: " << std::endl;
-    std::cout << "1 - Tons de Cinza || 2 - Cores invertidas " << std::endl;
+    std::cout << "1 - Tons de Cinza || 2 - Cores invertidas || 3 - Sépia " << std::endl;
     std::cin >> escolha;
     
     switch (escolha)
@@ -223,9 +223,18 @@ int sepImagem(std::string caminhoArquivo, std::string caminhoSaida){
 
             // Apenas lembrando : idxOrigem segue a ordem R, G & B.
             // Portanto : idxOrigem + 0 = R, idxOrigem + 1 = G, idxOrigem + 2 = B.
-            r = (img[idxOrigem + 0] * 0.393) + (img[idxOrigem + 1] * 0.769) + (img[idxOrigem + 2] * 0.189);
-            g = (img[idxOrigem + 0] * 0.349) + (img[idxOrigem + 1] * 0.686) + (img[idxOrigem + 2] * 0.168);
-            b = (img[idxOrigem + 0] * 0.272) + (img[idxOrigem + 1] * 0.534) + (img[idxOrigem + 2] * 0.131);
+
+            // Corrigindo cálculo para não resultar em um double atribuido em um unsigned char.
+            float rTemp = (img[idxOrigem + 0] * 0.393f) + (img[idxOrigem + 1] * 0.769f) + (img[idxOrigem + 2] * 0.189f);
+            float gTemp = (img[idxOrigem + 0] * 0.349f) + (img[idxOrigem + 1] * 0.686f) + (img[idxOrigem + 2] * 0.168f);
+            float bTemp = (img[idxOrigem + 0] * 0.272f) + (img[idxOrigem + 1] * 0.534f) + (img[idxOrigem + 2] * 0.131f);
+
+            // Pra quando os valores fiquem maiores que 255.
+            // Agora também convertendo de volta para unsigned char.
+            r = (unsigned char)(rTemp > 255 ? 255 : rTemp);
+            g = (unsigned char)(gTemp > 255 ? 255 : gTemp);
+            b = (unsigned char)(bTemp > 255 ? 255 : bTemp);
+
 
             sepImagem[idxOrigem + 0] = r;
             sepImagem[idxOrigem + 1] = g;
