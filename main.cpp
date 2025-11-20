@@ -116,8 +116,9 @@ int processaImagem(std::string caminhoArquivo, std::string caminhoSaida, TipoPro
     
     if(!img) return 1;
     
-    // Determinar canais de saída baseado no tipo, aqui só pra ter que lidar com edições BW.
-    int canaisSaida = (tipo == TONS_CINZA) ? 1 : canais;
+    // Determinar canais de saída baseado no tipo.
+    // Modficado agora para tornar possível com que a saída de SOBEL fique verde ao invés de vermelho.
+    int canaisSaida = (tipo == TONS_CINZA) ? 1 : (tipo == SOBEL) ? 3 : canais;
     std::vector<unsigned char> imgProcessada(largura * altura * canaisSaida);
     
     // Configurações específicas para blur
@@ -268,8 +269,10 @@ int processaImagem(std::string caminhoArquivo, std::string caminhoSaida, TipoPro
                     float magnitude = std::sqrt(magX * magX + magY * magY);
                     magnitude = std::min(255.0f, magnitude);
 
-                    // Saída em escala de cinza
-                    imgProcessada[idxDestino] = (unsigned char)magnitude;
+                    // Saída agora com RGB, focando mais no verde.
+                    imgProcessada[idxDestino + 0] = 0;
+                    imgProcessada[idxDestino + 1] = (unsigned char)magnitude;
+                    imgProcessada[idxDestino + 2] = 0;
                     
                     break;
                 }
