@@ -2,12 +2,15 @@
 // ironicamente deixando os mais fáceis por último agora.
 // [mvfm]
 //
-// Criado : 05/11/2025  || Última vez modificado : 19/11/2025
+// Criado : 05/11/2025  || Última vez modificado : 20/11/2025
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
+
+// Pra não ter que explicitamente ter que declarar PI quando compilo por minha máquina Windows.
+#define _USE_MATH_DEFINES
 #include <cmath>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -20,7 +23,8 @@ enum TipoProcessamento {
     TONS_CINZA = 1,
     CORES_INVERTIDAS = 2,
     SEPIA = 3,
-    GAUSSIAN_BLUR = 4
+    GAUSSIAN_BLUR = 4,
+    SOBEL = 5
 };
 
 // Protótipos
@@ -41,7 +45,7 @@ int main(){
     std::getline(std::cin, arquivoSaida);
 
     std::cout << "Digite como queiras editar a imagem selecionada: " << std::endl;
-    std::cout << "1 - Tons de Cinza || 2 - Cores invertidas || 3 - Sépia || 4 - Gaussian Blur" << std::endl;
+    std::cout << "1 - Tons de Cinza || 2 - Cores invertidas || 3 - Sépia || 4 - Gaussian Blur  || 5 - Detecção de Bordas" << std::endl;
     std::cin >> escolha;
     
     processaImagem(arquivoEntrada, arquivoSaida, (TipoProcessamento)escolha);
@@ -206,6 +210,67 @@ int processaImagem(std::string caminhoArquivo, std::string caminhoSaida, TipoPro
                         
                         imgProcessada[idxDestino + c] = (unsigned char)soma;
                     }
+                    break;
+                }
+
+                // Método de detecção de bordas baseado em diferença de cores. Outro kernel.
+                case SOBEL: {
+                    float kernelX[3][3] = {
+                        {-1, 0, 1},
+                        {-2, 0, 2},
+                        {-1, 0, 1}
+                    };
+                    float kernelY[3][3] = {
+                        {-1, -2, -1},
+                        { 0,  0,  0},
+                        { 1,  2,  1}
+                    };
+
+                    // Converter para escala de cinza primeiro
+                    // Não re-utilizando o processamento BW pois não tenho certeza se isso funcionaria.
+                    unsigned char r, g, b;
+                    if(canais >= 3) {
+                        r = img[idxOrigem + 0];
+                        g = img[idxOrigem + 1];
+                        b = img[idxOrigem + 2];
+                    } else {
+                        r = g = b = img[idxOrigem];
+                    }
+                    unsigned char cinza = (unsigned char)(0.299f * r + 0.587f * g + 0.114f * b);
+
+                    float magX = 0.0f;
+                    float magY = 0.0f;
+
+                    // Aplicando kernels com verificação de bordas
+                    for(int ky = -1; ky <= 1; ky++) {
+                        for(int kx = -1; kx <= 1; kx++) {
+                            int py = std::max(0, std::min(altura - 1, y + ky));
+                            int px = std::max(0, std::min(largura - 1, x + kx));
+                            
+                            int idx = (py * largura + px) * canais;
+                            
+                            // Pegar valor em escala de cinza do pixel vizinho
+                            unsigned char pixelCinza;
+                            if(canais >= 3) {
+                                pixelCinza = (unsigned char)(0.299f * img[idx] + 
+                                                            0.587f * img[idx + 1] + 
+                                                            0.114f * img[idx + 2]);
+                            } else {
+                                pixelCinza = img[idx];
+                            }
+                            
+                            magX += pixelCinza * kernelX[ky + 1][kx + 1];
+                            magY += pixelCinza * kernelY[ky + 1][kx + 1];
+                        }
+                    }
+
+                    // Calcular magnitude do gradiente
+                    float magnitude = std::sqrt(magX * magX + magY * magY);
+                    magnitude = std::min(255.0f, magnitude);
+
+                    // Saída em escala de cinza
+                    imgProcessada[idxDestino] = (unsigned char)magnitude;
+                    
                     break;
                 }
                 
